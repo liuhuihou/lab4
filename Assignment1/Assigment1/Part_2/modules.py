@@ -1,78 +1,59 @@
+"""NumPy layers using row-major batches; no automatic differentiation."""
 import numpy as np
 
-class Linear(object):
-    def __init__(self, in_features, out_features):
-        """
-        Initializes a linear (fully connected) layer. 
-        TODO: Initialize weights and biases.
-        - Weights should be initialized to small random values (e.g., using a normal distribution).
-        - Biases should be initialized to zeros.
-        Formula: output = x * weight + bias
-        """
-        # Initialize weights and biases with the correct shapes.
-        self.params = {'weight': None, 'bias': None}
-        self.grads = {'weight': None, 'bias': None}
+
+class Linear:
+    def __init__(self, in_features, out_features, rng=None):
+        """Small N(0, 0.1**2) weights and zero biases."""
+        rng = np.random.default_rng() if rng is None else rng
+        self.params = {
+            'weight': rng.normal(0.0, 0.1, (in_features, out_features)),
+            'bias': np.zeros(out_features),
+        }
+        self.grads = {k: np.zeros_like(v) for k, v in self.params.items()}
 
     def forward(self, x):
-        """
-        Performs the forward pass using the formula: output = xW + b
-        TODO: Implement the forward pass.
-        """
-        return None
+        self.x = x
+        return x @ self.params['weight'] + self.params['bias']
 
     def backward(self, dout):
-        """
-        Backward pass to calculate gradients of loss w.r.t. weights and inputs.
-        TODO: Implement the backward pass.
-        """
-        return None
+        self.grads['weight'] = self.x.T @ dout
+        self.grads['bias'] = dout.sum(axis=0)
+        return dout @ self.params['weight'].T
 
-class ReLU(object):
+
+class ReLU:
     def forward(self, x):
-        """
-        Applies the ReLU activation function element-wise to the input.
-        Formula: output = max(0, x)
-        TODO: Implement the forward pass.
-        """
-        return None
+        self.mask = x > 0
+        return np.maximum(x, 0)
 
     def backward(self, dout):
-        """
-        Computes the gradient of the ReLU function.
-        TODO: Implement the backward pass.
-        Hint: Gradient is 1 for x > 0, otherwise 0.
-        """
-        return None
+        return dout * self.mask
 
-class SoftMax(object):
+
+class SoftMax:
     def forward(self, x):
-        """
-        Applies the softmax function to the input to obtain output probabilities.
-        Formula: softmax(x_i) = exp(x_i) / sum(exp(x_j)) for all j
-        TODO: Implement the forward pass using the Max Trick for numerical stability.
-        """
-        return None
+        shifted = x - x.max(axis=1, keepdims=True)
+        exponentials = np.exp(shifted)
+        self.probabilities = exponentials / exponentials.sum(axis=1, keepdims=True)
+        return self.probabilities
 
     def backward(self, dout):
+        """Jacobian-vector product for an upstream probability gradient.
+        Training uses fused CrossEntropy.backward and skips this operation.
         """
-        The backward pass for softmax is often directly integrated with CrossEntropy for simplicity.
-        TODO: Keep this in mind when implementing CrossEntropy's backward method.
-        """
-        return None
+        p = self.probabilities
+        return p * (dout - (dout * p).sum(axis=1, keepdims=True))
 
-class CrossEntropy(object):
+
+class CrossEntropy:
     def forward(self, x, y):
-        """
-        Computes the CrossEntropy loss between predictions and true labels.
-        Formula: L = -sum(y_i * log(p_i)), where p is the softmax probability of the correct class y.
-        TODO: Implement the forward pass.
-        """
-        return None
+        """Mean cross entropy of probabilities x and one-hot targets y."""
+        return float(-np.sum(y * np.log(np.maximum(x, np.finfo(float).tiny))) / len(x))
 
     def backward(self, x, y):
+        """Fused softmax + mean cross entropy gradient w.r.t. LOGITS.
+        Pass directly to MLP.backward; do not apply SoftMax.backward again.
+        The batch normalization occurs here exactly once.
         """
-        Computes the gradient of CrossEntropy loss with respect to the input.
-        TODO: Implement the backward pass.
-        Hint: For softmax output followed by cross-entropy loss, the gradient simplifies to: p - y.
-        """
-        return None
+        return (x - y) / len(x)

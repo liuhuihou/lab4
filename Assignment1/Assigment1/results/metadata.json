@@ -1,0 +1,43 @@
+{
+  "student_id": "12411103",
+  "python": "3.14.6 | packaged by Anaconda, Inc. | (main, Jul  9 2026, 14:29:05) [MSC v.1942 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "numpy": "2.5.3",
+  "scikit_learn": "1.9.0",
+  "matplotlib": "3.11.2",
+  "mlp_seeds": [
+    42,
+    43,
+    44
+  ],
+  "perceptron_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51
+  ],
+  "batch_sizes": [
+    1,
+    16,
+    32,
+    128,
+    800
+  ],
+  "mlp_config": {
+    "hidden": [
+      20
+    ],
+    "learning_rate": 0.01,
+    "epochs": 1500,
+    "eval_freq": 10,
+    "noise": 0.0,
+    "weight_std": 0.1
+  },
+  "total_seconds": 156.13423750002403
+}

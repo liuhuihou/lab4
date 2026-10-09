@@ -1,0 +1,7 @@
+numpy>=1.24,<3
+scikit-learn>=1.2,<2
+matplotlib>=3.7,<4
+nbformat>=5.7,<6
+nbclient>=0.8,<1
+ipykernel>=6,<8
+notebook>=7,<8

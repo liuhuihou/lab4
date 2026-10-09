@@ -1,6 +1,6 @@
 # Multi-Layer Perceptron (MLP) Implementation in NumPy
 
-This repository contains an <span style="color:red;"> incomplete </span> implementation of a Multi-Layer Perceptron (MLP), a type of feedforward artificial neural network, using only NumPy for computations. This code is designed for educational purposes to help you guys understand the basics of neural networks, including forward propagation, backpropagation, and the training process.
+This folder contains the completed NumPy MLP for student 12411103. See the submission-root README.md for all experiment commands, reproducibility settings, tests, and the executed notebook.
 
 ## Overview
 
